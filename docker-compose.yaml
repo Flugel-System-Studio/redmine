@@ -1,0 +1,61 @@
+######################################################################
+# Redmine develop docker-compose
+#
+# 作成日：2020/07/07 作成者：akihiro.toda
+# 更新日：yyyy/mm/dd 更新者：name
+#
+# Copyright (c)  Inc. - All rights reserved.
+######################################################################
+
+version: "3.7"
+
+service:
+  redmine_app:
+    build: ./app/develop
+    container_name: "redmine.sig.app"
+    restart: always
+    ports:
+      - 8080:3000
+    environment:
+      # HTTP_PROXY: http://xxxxxx@tm-nets.com:xxxxxx@TMNpxy01.tmn.office:8080
+      # HTTPS_PROXY: http://xxxxxx@tm-nets.com:xxxxxx@TMNpxy01.tmn.office:8080
+      HTTP_PROXY: http://akihiro.toda@tm-nets.com:1512Bjm1213@TMNpxy01.tmn.office:8080
+      HTTPS_PROXY: http://akihiro.toda@tm-nets.com:1512Bjm1213@TMNpxy01.tmn.office:8080
+      TZ: Asia/Tokyo
+    env_file: ./config/.env
+    volumes:
+      - ./app/files:/usr/src/redmine/files
+      - ./app/log/:/usr/src/redmine/log
+      - ./app/public/themes:/usr/src/redmine/public/themes
+    networks:
+      redminenet:
+        ipv4_address: 172.11.0.3
+
+  redmine_db:
+    build: ./db/develop
+    container_name: "redmine.sig.db"
+    restart: always
+    environment:
+      # HTTP_PROXY: http://xxxxxx@tm-nets.com:xxxxxx@TMNpxy01.tmn.office:8080
+      # HTTPS_PROXY: http:/xxxxxx@tm-nets.com:xxxxxx@TMNpxy01.tmn.office:8080
+      HTTP_PROXY: http://akihiro.toda@tm-nets.com:1512Bjm1213@TMNpxy01.tmn.office:8080
+      HTTPS_PROXY: http://akihiro.toda@tm-nets.com:1512Bjm1213@TMNpxy01.tmn.office:8080
+      TZ: Asia/Tokyo
+    env_file: ./db/config/db.env
+    ports:
+      - 3306:3306
+    volumesl:
+      - ./db/data:/var/lib/mysql
+      - ./db/result:/var/lib/mysql-files
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    networks:
+      redminenet:
+        ipv4_address: 172.11.0.4
+
+networks:
+  redminenet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.11.0.0/24
