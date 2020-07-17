@@ -2,41 +2,42 @@
 # Redmine production docker-compose
 #
 # 作成日：2020/07/08 作成者：akihiro.toda
-# 更新日：yyyy/mm/dd 更新者：name
+# 更新日：2020/07/17 更新者：akihiro.toda
 #
 # Copyright (c)  Inc. - All rights reserved.
 ######################################################################
 
 version: "3.7"
 
-service:
-  redmine_app:
-    build: ./app/develop
-    container_name: "redmine.sig.app"
+services:
+  redmine-app:
+    build: ./app/production
+    container_name: redmine-app
     restart: always
     ports:
       - 8080:3000
     environment:
       TZ: Asia/Tokyo
-    env_file: ./config/.env
+    env_file: ./app/config/db.env
     volumes:
       - ./app/files:/usr/src/redmine/files
-      - ./app/log/:/usr/src/redmine/log
+      - ./app/log:/usr/src/redmine/log
+      - ./app/plugins:/usr/src/redmine/plugins
       - ./app/public/themes:/usr/src/redmine/public/themes
     networks:
       redminenet:
         ipv4_address: 172.11.0.3
 
-  redmine_db:
-    build: ./db/develop
-    container_name: "redmine.sig.db"
+  redmine-db:
+    build: ./db/production
+    container_name: redmine-db
     restart: always
     environment:
       TZ: Asia/Tokyo
     env_file: ./db/config/db.env
     ports:
       - 3306:3306
-    volumesl:
+    volumes:
       - ./db/data:/var/lib/mysql
       - ./db/result:/var/lib/mysql-files
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
